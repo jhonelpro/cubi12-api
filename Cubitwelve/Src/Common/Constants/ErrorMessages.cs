@@ -2,8 +2,14 @@ namespace Cubitwelve.Src.Common.Constants
 {
     public static class ErrorMessages
     {
+        /// <summary>
+        /// Entity not found message
+        /// </summary>
         public const string EntityNotFound = "Entity not found";
 
+        /// <summary>
+        /// Invalid credentials message
+        /// </summary>
         public const string InvalidCredentials = "Invalid credentials";
 
         public const string EntityNotDeleted = "Entity not deleted";
