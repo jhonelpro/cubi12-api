@@ -52,17 +52,40 @@ namespace Cubitwelve.Src.Extensions
 
         private static void AddDbContext(IServiceCollection services)
         {
-            var connectionUrl = Env.GetString("DB_CONNECTION");
+            var connectionUrl = GetConnectionString();
 
             services.AddDbContext<DataContext>(opt => {
-                opt.UseSqlServer(connectionUrl, sqlServerOpt => {
-                    sqlServerOpt.EnableRetryOnFailure(
+                opt.UseNpgsql(connectionUrl, npgsqlOpt => {
+                    npgsqlOpt.EnableRetryOnFailure(
                         maxRetryCount: 10,
                         maxRetryDelay: System.TimeSpan.FromSeconds(30),
-                        errorNumbersToAdd: null
+                        errorCodesToAdd: null
                     );
+                    npgsqlOpt.MigrationsHistoryTable("__EFMigrationsHistory");
                 });
             });
+        }
+
+        private static string GetConnectionString()
+        {
+            // Primero intenta leer DB_CONNECTION directamente
+            var dbConnection = Env.GetString("DB_CONNECTION");
+            if (!string.IsNullOrEmpty(dbConnection) && !dbConnection.StartsWith("postgres://"))
+            {
+                return dbConnection;
+            }
+
+            // Si está en Render, convierte DATABASE_URL
+            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            if (string.IsNullOrEmpty(databaseUrl))
+            {
+                throw new InvalidOperationException("No database connection string found. Set DB_CONNECTION or DATABASE_URL");
+            }
+
+            var uri = new Uri(databaseUrl);
+            var userInfo = uri.UserInfo.Split(':');
+            
+            return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
         }
 
         private static void AddUnitOfWork(IServiceCollection services)

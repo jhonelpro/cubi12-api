@@ -1,10 +1,44 @@
-version: '3.3'
-
 services:
-  sqldata:
-    image: mcr.microsoft.com/mssql/server
+  postgres:
+    image: postgres:15-alpine
+    container_name: cubi12-postgres
     environment:
-    - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
-    - ACCEPT_EULA=Y
+      POSTGRES_USER: cubi12
+      POSTGRES_PASSWORD: P@ssw0rd123
+      POSTGRES_DB: cubi12db
     ports:
-    - "5434:1433"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cubi12 -d cubi12db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cubi12-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cubi12-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DB_CONNECTION=Host=postgres;Port=5432;Database=cubi12db;Username=cubi12;Password=P@ssw0rd123
+      - JWT_SECRET=tu-secreto-super-seguro-aqui-minimo-32-caracteres-para-desarrollo
+    ports:
+      - "5000:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - cubi12-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  cubi12-network:
+    driver: bridge

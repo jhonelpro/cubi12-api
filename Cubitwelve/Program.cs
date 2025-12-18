@@ -1,7 +1,13 @@
 using Cubitwelve.Src.Extensions;
 using Cubitwelve.Src.Middlewares;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.UseUrls($"http://*:{port}");
+
 var localAllowSpecificOrigins = "_localAllowSpecificOrigins";
 var deployedAllowSpecificOrigins = "_deployedAllowSpecificOrigins";
 

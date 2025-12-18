@@ -1,0 +1,51 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  CI:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up .NET 7.0
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '7.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore Cubitwelve.sln
+      
+    - name: Build
+      run: dotnet build Cubitwelve.sln --configuration Release --no-restore
+    
+    - name: Login to Docker Hub
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+    
+    - name: Build Docker Image
+      run: docker build -t cubi12-backend -f Cubitwelve/Dockerfile ./Cubitwelve
+    
+    - name: Tag Docker Image
+      run: docker tag cubi12-backend ${{ secrets.DOCKERHUB_USERNAME }}/cubi12-backend:latest
+    
+    - name: Push to Docker Hub
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/cubi12-backend:latest
+
+  CD:
+    needs: CI
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Deploy to Render
+      run: curl -X POST "${{ secrets.DEPLOY_WEBHOOK }}"
