@@ -21,8 +21,7 @@ builder.Services.AddCors(options =>
                                 .AllowCredentials()
                                 .WithOrigins("http://localhost:3000",
                                             "http://localhost:8100",
-                                            "http://localhost",
-                                            "https://cubi12-front-latest.onrender.com");
+                                            "http://localhost");
                       });
     options.AddPolicy(name: deployedAllowSpecificOrigins,
                       policy =>
@@ -30,10 +29,10 @@ builder.Services.AddCors(options =>
                           policy.AllowAnyHeader()
                                 .AllowAnyMethod()
                                 .AllowCredentials()
-                                .WithOrigins("https://cubi12.azurewebsites.net",
+                                .WithOrigins("https://cubi12-front-latest.onrender.com",  // ✅ Agregar aquí
+                                            "https://cubi12.azurewebsites.net",
                                             "https://cubi12.cl",
-                                            "https://www.cubi12.cl"
-                                            );
+                                            "https://www.cubi12.cl");
                       });
 });
 
