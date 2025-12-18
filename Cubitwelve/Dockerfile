@@ -18,5 +18,9 @@ COPY --from=build-env /App/out .
 # Expose port (documenta que acepta cualquier puerto)
 EXPOSE 80
 
-# Specify the entry point for the application
-ENTRYPOINT ["dotnet", "Cubitwelve.dll"]
+# Install dotnet-ef tool so migrations can run
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Apply migrations and start the app
+ENTRYPOINT ["bash", "-c", "dotnet ef database update && dotnet Cubitwelve.dll"]

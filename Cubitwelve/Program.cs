@@ -21,7 +21,8 @@ builder.Services.AddCors(options =>
                                 .AllowCredentials()
                                 .WithOrigins("http://localhost:3000",
                                             "http://localhost:8100",
-                                            "http://localhost");
+                                            "http://localhost",
+                                            "https://cubi12-front-latest.onrender.com");
                       });
     options.AddPolicy(name: deployedAllowSpecificOrigins,
                       policy =>
