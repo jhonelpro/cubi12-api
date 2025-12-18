@@ -27,6 +27,12 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore Cubitwelve.sln
       
+    - name: Apply EF Migrations
+      run: |
+        dotnet tool install --global dotnet-ef --version 7.0.14
+        export PATH="$PATH:$HOME/.dotnet/tools"
+        dotnet ef database update --project Cubitwelve/Cubitwelve.csproj
+    
     - name: Build
       run: dotnet build Cubitwelve.sln --configuration Release --no-restore
     
