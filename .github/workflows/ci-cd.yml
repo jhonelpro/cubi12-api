@@ -29,9 +29,12 @@ jobs:
       
     - name: Apply EF Migrations
       run: |
-        dotnet tool install --global dotnet-ef --version 7.0.14
+        dotnet tool install --global dotnet-ef --version 7.0.18
         export PATH="$PATH:$HOME/.dotnet/tools"
         dotnet ef database update --project Cubitwelve/Cubitwelve.csproj
+      env:
+        DB_CONNECTION: ${{ secrets.DB_CONNECTION }}
+
     
     - name: Build
       run: dotnet build Cubitwelve.sln --configuration Release --no-restore
